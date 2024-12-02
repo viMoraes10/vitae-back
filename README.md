@@ -1,4 +1,4 @@
-# Bem-vindo ao Back-End do VAGAS!
+# Bem-vindo ao Back-End do Vasco!
 
 Desenvolvi este projeto com muito cuidado e dedicação, buscando criar uma interface o mais intuitiva possível. Ele é um reflexo do meu estilo de programação e, embora haja sempre espaço para melhorias, estou evoluindo a cada dia. Concluir um software com back-end e front-end em apenas 7 dias foi um grande desafio.
 
