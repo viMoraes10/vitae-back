@@ -122,23 +122,11 @@ Para executar os testes automatizados do backend:
 
 ### Backend
 
-- *Docker*: Você pode criar uma imagem Docker do backend para implantação. Certifique-se de ter o Docker instalado e execute:
+- Execute a aplicação diretamente com o PostgreSQL local configurado em `src/main/resources/application.properties`. Para ambientes diferentes, altere a URL, usuário e senha para o banco de dados desejado. Por padrão, a API sobe na porta 8080.
 
-  bash
-  docker build -t vitae-backend .
-  docker run -p 8080:8080 vitae-back
+### Documentação e exploração da API
 
-## Criar a imagem Docker:
-Criar a imagem Docker:
-No diretório raiz do projeto, execute:
-docker build -t vitae-backend .
-
-Rodar o container:
-
-Após criar a imagem Docker, inicie o container com o comando:
-docker run -p 8080:8080 vitae-backend
-
-O backend estará acessível em http://localhost:8080.
+- Com a aplicação em execução, acesse o Swagger UI em `http://localhost:8080/swagger-ui/index.html` para explorar os endpoints (`/api/**`).
 
 
 
@@ -171,10 +159,9 @@ O backend estará acessível em http://localhost:8080.
   - *Spring Boot*: Framework para construção de aplicações Java.
   - *PostgreSQL*: Sistema de gerenciamento de banco de dados relacional.
   - *RESTful API com Spring Boot*: Comunicação entre o backend e os clientes.
-  - *Spring Security*: Autenticação e autorização.
-  - *Postman*: Testes e documentação das APIs.
-  - *JUnit e Mockito*: Frameworks de testes.
-  - *Docker*: Criação de containers para facilitar o deploy.
+- *Spring Security*: Autenticação e autorização.
+- *Postman*: Testes e documentação das APIs.
+- *JUnit e Mockito*: Frameworks de testes.
 
 ## ✒ Autores
 
