@@ -3,6 +3,7 @@ package com.example.demo.infra.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.example.demo.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,66 +16,61 @@ import java.time.*;
 @Service
 public class TokenService {
 
-    /**
-     * Secret key for token generation and validation.
-     */
-    @Value("${api.security.token.secret}")
-    private String secret;
+    private static final String ISSUER = "auth-api";
+
+    private final String secret;
+
+    // TTL configurável (padrão: 4h = 14400s)
+    private final long ttlSeconds;
+
+    public TokenService(
+            @Value("${api.security.token.secret}") String secret,
+            @Value("${api.security.token.ttl-seconds:14400}") long ttlSeconds
+    ) {
+        this.secret = secret;
+        this.ttlSeconds = ttlSeconds;
+    }
 
     /**
-     * Generates a JWT token for a given user.
-     *
-     * @param user The user for whom the token is to be generated.
-     * @return The generated JWT token.
-     * @throws RuntimeException if there is an error while generating the token.
+     * Gera um JWT para o usuário (subject = email).
      */
     public String generateToken(User user) {
+        return generateToken(user.getEmail());
+    }
+
+    /**
+     * Gera um JWT para o subject informado (email).
+     */
+    public String generateToken(String subjectEmail) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
-                    .withIssuer("auth-api")
-                    .withSubject(user.getEmail())
-                    .withExpiresAt(genExpirationDate())
+            Instant now = Instant.now();
+            Instant exp = now.plusSeconds(ttlSeconds);
+
+            return JWT.create()
+                    .withIssuer(ISSUER)
+                    .withSubject(subjectEmail)
+                    .withIssuedAt(now)
+                    .withExpiresAt(exp)
                     .sign(algorithm);
-            return token;
-        }catch (JWTCreationException exception) {
-            throw new RuntimeException("Error while generating token: ",exception);
+        } catch (JWTCreationException e) {
+            throw new RuntimeException("Error while generating token", e);
         }
     }
 
     /**
-     * Validates a given JWT token.
-     *
-     * @param token The JWT token to be validated.
-     * @return The subject of the validated token.
-     * @throws RuntimeException if there is an error while validating the token.
+     * Valida o token e retorna o subject (email) se OK.
      */
-    public  String validateToken(String token){
+    public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
-                    .withIssuer("auth-api")
+                    .withIssuer(ISSUER)
                     .build()
                     .verify(token)
                     .getSubject();
-
-        }catch (JWTCreationException exception) {
-            throw new RuntimeException("Error while validating token: ",exception);
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Error while validating token", e);
         }
-    }
-
-    /**
-     * Generates an expiration date for the JWT token.
-     *
-     * @return The generated expiration date.
-     */
-    private Instant genExpirationDate(){
-        LocalDateTime localDateTime = LocalDateTime.now().plusHours(2);
-
-        // Converts LocalDateTime to ZonedDateTime using the system's default timezone
-        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-        Instant instant = zonedDateTime.toInstant();
-
-        return instant;
     }
 }
