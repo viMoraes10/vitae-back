@@ -18,7 +18,7 @@ public class TokenService {
     /**
      * Secret key for token generation and validation.
      */
-    @Value("${api.security.toker.secret}")
+    @Value("${api.security.token.secret}")
     private String secret;
 
     /**

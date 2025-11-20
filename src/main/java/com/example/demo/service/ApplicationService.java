@@ -8,12 +8,13 @@ import com.example.demo.model.User;
 import com.example.demo.repository.ApplicationsRepository;
 import com.example.demo.repository.JobRepository;
 import com.example.demo.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
@@ -34,30 +35,28 @@ public class ApplicationService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationService.class);
 
     public List<Applications> getAll() {
-
-        return null;
+        return applicationsRepository.findAll();
     }
 
-    public ResponseEntity<?> created(ApplicationDTO applicationDTO) {
+    public Applications created(ApplicationDTO applicationDTO) {
         log.info("Init Created application");
 
         Optional<User> user = usersRepository.findById(applicationDTO.userId());
         if (user.isEmpty()) {
             log.error("User not found");
-            return ResponseEntity.badRequest().body("User not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
         }
 
         Optional<Jobs> job = jobsRepository.findById(applicationDTO.jobId());
         if (job.isEmpty()) {
             log.error("Job not found");
-            return ResponseEntity.badRequest().body("Job not found");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job not found");
         }
 
         Applications application = new Applications(user.get(), job.get(), new Date(), applicationDTO.status());
 
-
         applicationsRepository.saveAndFlush(application);
-        return ResponseEntity.ok(application);
+        return application;
     }
 
     public ResponseEntity<?> getAllWithUserId(Long userId) {
@@ -86,17 +85,22 @@ public class ApplicationService {
         return ResponseEntity.ok(applications);
     }
 
-    public Applications putStatus(Long id, String newStatus) {
+    public Applications putStatus(Long id, ApplicationStatus newStatus) {
        log.info("Update status of application");
 
        Optional<Applications> applications = applicationsRepository.findById(id);
        if (applications.isEmpty()){
            log.error("Application not found");
-           return null;
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found");
        }
-       applications.get().setStatus(ApplicationStatus.valueOf(newStatus));
+       applications.get().setStatus(newStatus);
        applicationsRepository.saveAndFlush(applications.get());
        return applications.get();
+    }
+
+    public Applications getById(Long id) {
+        return applicationsRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found"));
     }
 }
 

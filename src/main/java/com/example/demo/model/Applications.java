@@ -30,6 +30,8 @@ public class Applications {
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
+    public Applications() {}
+
     public Applications(User user, Jobs job, Date date, ApplicationStatus status) {
         this.user = user;
         this.job = job;

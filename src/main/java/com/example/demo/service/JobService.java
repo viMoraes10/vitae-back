@@ -4,7 +4,9 @@ import com.example.demo.dto.JobDTO;
 import com.example.demo.model.Jobs;
 import com.example.demo.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +21,13 @@ public class JobService {
         return jobRepository.findAll();
     }
 
-    public Optional<Jobs> getJob(Long id ) {
-        return jobRepository.findById(id);
+    public List<Jobs> getActiveJobs() {
+        return jobRepository.findByIsActiveTrue();
+    }
+
+    public Jobs getJob(Long id ) {
+        return jobRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found"));
     }
 
 
@@ -34,7 +41,7 @@ public class JobService {
         Optional<Jobs> jobs = jobRepository.findById(id);
 
          if (jobs.isEmpty())
-             return null;
+             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
 
         Jobs jobOld = jobs.get();
         jobOld.setDescription(jobDTO.description());
